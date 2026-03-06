@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>أقم يا مسلم</title>
+
+<style>
+
+body{
+background:#020617;
+font-family:Arial;
+color:white;
+text-align:center;
+}
+
+.header{
+font-size:28px;
+color:#22c55e;
+margin-top:20px;
+}
+
+.card{ackground:#1e293b;
+margin:15px;
+padding:20px;
+border-radius:15px;
+}
+
+.prayer{
+padding:10px;
+margin:6px;ackground:#0f172a;
+border-radius:8px;
+}
+
+button{
+padding:12px;
+border:none;ackground:#22c55e;
+color:white;
+border-radius:8px;
+margin:5px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">أقم يا مسلم</div>
+
+<div class="card">
+
+<div id="city">تحديد الموقع...</div>
+
+<div class="prayer" id="Fajr"></div>
+<div class="prayer" id="Dhuhr"></div>
+<div class="prayer" id="Asr"></div>
+<div class="prayer" id="Maghrib"></div>
+<div class="prayer" id="Isha"></div>
+
+</div>
+
+<div class="card">
+
+<h3>أذكار</h3>
+
+<p>اللهم بك أصبحنا وبك أمسينا وبك نحيا وبك نموت</p>
+
+<p>أستغفر الله العظيم وأتوب إليه</p>
+
+<p>سبحان الله وبحمده سبحان الله العظيم</p>
+
+</div>
+
+<div class="card">
+
+<button onclick="openQibla()">اتجاه القبلة</button>
+
+</div>
+
+<audio id="azan" src="https://cdn.islamic.network/adhan/audio/adhan.mp3"></audio>
+
+<script>
+
+if(Notification.permission!="granted"){
+Notification.requestPermission();
+}
+
+async function loadTimes(lat,lon){
+
+let api=`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=5`;
+
+let res=await fetch(api);
+
+let data=await res.json();
+
+let t=data.data.timings;
+
+document.getElementById("Fajr").innerText="الفجر : "+t.Fajr;
+document.getElementById("Dhuhr").innerText="الظهر : "+t.Dhuhr;
+document.getElementById("Asr").innerText="العصر : "+t.Asr;
+document.getElementById("Maghrib").innerText="المغرب : "+t.Maghrib;
+document.getElementById("Isha").innerText="العشاء : "+t.Isha;
+
+checkAzan(t);
+
+}
+
+function checkAzan(times){
+
+setInterval(()=>{
+
+let now=new Date();
+
+let current=now.getHours()+":"+String(now.getMinutes()).padStart(2,"0");
+
+for(let p in times){
+
+if(times[p].slice(0,5)==current){
+
+document.getElementById("azan").play();
+
+new Notification("حان الآن موعد الصلاة",{body:p});
+
+}
+
+}
+
+},20000);
+
+}
+
+function openQibla(){
+
+window.open("https://qiblafinder.withgoogle.com/");
+
+}
+
+navigator.geolocation.getCurrentPosition((pos)=>{
+
+let lat=pos.coords.latitude;
+
+let lon=pos.coords.longitude;
+
+document.getElementById("city").innerText="تم تحديد الموقع";
+
+loadTimes(lat,lon);
+
+});
+
+</script>
+
+</body>
+</html>
